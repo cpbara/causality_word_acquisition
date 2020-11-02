@@ -1,0 +1,11 @@
+*.torch
+models/*.torch
+Attention.py
+AttentionModel.py
+sandbox.py
+*.pyc
+*/*.pyc
+data_chunk.py
+data_provider.py
+nohup.out
+.vscode
