@@ -77,7 +77,8 @@ def main(args):
         batch_preproc=batch_prepper,
         batch_postproc=batch_parser,
         epoch_postproc=epoch_parser,
-        device = args.device
+        device = args.device,
+        max_grad_norm=2.0
     )
 
     timer = Stopwatch()
@@ -90,7 +91,7 @@ def main(args):
             f'Acc: ({ta:5.1f}, {va:5.1f})',
             timer.lap_str()
         ])
-        print(out_str)
+        print(out_str, flush=True)
         if pa < va:
             if not args.mental_attention_model_path is None:
                 torch.save(model.mental_attention.state_dict(), args.mental_attention_model_path)
