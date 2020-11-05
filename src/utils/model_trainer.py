@@ -31,37 +31,40 @@ class ModelTrainer:
         self.max_grad_norm = max_grad_norm
         
     def forward(self,batch):
+        self.model.to(self.device)
         data, labels = self.prep_batch(batch)
         prediction = self.model(data.to(self.device))
         loss = self.criterion(prediction, labels.to(self.device))
         return loss, prediction, labels
     
-    def train(self,batch):
+    def train(self,i,batch,n):
         self.model.train()
         self.optimizer.zero_grad()
         loss, prediction, labels = self.forward(batch)
         loss.backward()
         nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
         self.optimizer.step()
-        return loss.item(), self.parse_batch(prediction, labels)
+        return self.parse_batch(i,n,loss.item(), prediction, labels)
     
-    def validate(self,batch):
+    def validate(self,i,batch,n):
         self.model.eval()
         loss, prediction, labels = self.forward(batch)
-        return loss.item(), self.parse_batch(prediction, labels)
+        return self.parse_batch(i,n,loss.item(), prediction, labels)
     
     def __call__(self, data_loader):
-        train_res = [self.train(batch)    for batch in data_loader['training']]
+        fun = lambda f,l: [f(i,b,len(l)) for i,b in enumerate(l)]
+        train_res = fun(self.train,data_loader['training'])
         torch.cuda.empty_cache()
-        val_res   = [self.validate(batch) for batch in data_loader['validation']]
+        val_res   = fun(self.validate,data_loader['validation'])
         torch.cuda.empty_cache()
         return self.parse_epoch(train_res, val_res)
     
     def test(self, data_loader):
-        train_res = [self.validate(batch) for batch in data_loader['training']]
+        fun = lambda f,l: [f(i,b,len(l)) for i,b in enumerate(l)]
+        train_res = fun(self.validate,data_loader['training'])
         torch.cuda.empty_cache()
-        val_res   = [self.validate(batch) for batch in data_loader['validation']]
+        val_res   = fun(self.validate,data_loader['validation'])
         torch.cuda.empty_cache()
-        test_res  = [self.validate(batch) for batch in data_loader['testing']]
+        test_res  = fun(self.validate,data_loader['testing'])
         torch.cuda.empty_cache()
         return self.parse_epoch(train_res, val_res, test_res)
