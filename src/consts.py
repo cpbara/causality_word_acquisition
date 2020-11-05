@@ -12,4 +12,5 @@ class Consts:
     data_root_path = '/local/cpbara/actions-transitions/action_frames_release/'
     learning_rate = 1e-3
     num_epochs = 1000
-    batch_size = 256
+    batch_size = 64
+    max_grad_norm = 1.0
