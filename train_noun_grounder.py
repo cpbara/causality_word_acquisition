@@ -28,12 +28,16 @@ def compare_bboxes(y, gt):
         min(yb[1] + yb[3], gtb[1] + gtb[3]) - max(yb[1], gtb[1]),
     ])
     
-    if (i[2] <= 0) or (i[3] <= 0):
-        IoU = 0
+    if (np.argmax(yi) == 0) and (gti[0] == 1):
+        IoU = 1
     else:
-        IoU = i[2]*i[3] / (yb[2]*yb[3] + gtb[2]*gtb[3] - i[2]*i[3])
+        if (i[2] <= 0) or (i[3] <= 0):
+            IoU = 0
+        else:
+            IoU = i[2]*i[3] / (yb[2]*yb[3] + gtb[2]*gtb[3] - i[2]*i[3])
         
     return [int((IoU > 0.5) and (np.argmax(yi) == 0)), int(gti[0])]
+    # return [int(np.argmax(yi) == 0), int(gti[0])]
 
 def main(args):
     def batch_prepper(batch):
@@ -65,6 +69,7 @@ def main(args):
 
     mse = nn.MSELoss()
     criterion = lambda x, l: mse(x[0],l[0])/3 + 2*mse(x[1],l[1])/3
+    # criterion = lambda x, l: mse(x[1],l[1])
 
     trainer = ModelTrainer(
         model = model,
