@@ -14,9 +14,9 @@ class NoundGroundingModel(nn.Module):
 
         linearLayer = lambda i, o: nn.Sequential(
             nn.Linear(i, o),
-            # nn.BatchNorm(o),
+            nn.BatchNorm1d(o),
             nn.ReLU(),
-            nn.Dropout(0.1),
+            # nn.Dropout(0.2),
         )
 
         self.mental_attention = MentalAttentionModel()
