@@ -26,7 +26,7 @@ class CaptionInstanceLoader:
         return self.length
         
     def __getitem__(self, index):
-        if not self.captions:
+        if self.captions is None:
             amt_files = sorted(glob(os.path.join(self.path,'*_amt.txt')))
             self.captions = [open(x).readline().strip() for x in amt_files]
             self.length = len(self.captions)
