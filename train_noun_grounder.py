@@ -44,9 +44,9 @@ def main(args):
         return batch[0], batch[1]
 
     def batch_parser(*args):
-        y, gt  = args
+        y, gt  = args[-2:]
         retval = [compare_bboxes(x[:2],x[2:]) for x in zip(y[0],y[1],gt[0], gt[1])]
-        return [x for x in zip(*retval)]
+        return args[2], [x for x in zip(*retval)]
         
     def epoch_parser(train_results, val_results):
         train_losses,   train_pairs = zip(*train_results)

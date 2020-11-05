@@ -28,7 +28,7 @@ def main(args):
         return batch[0], torch.tensor([SUPER_CLASSES[l] for l in batch[1]])
 
     def batch_parser(*args):
-        return list(torch.argmax(args[0],dim=-1).cpu().data.numpy()), list(args[1].cpu().data.numpy())
+        return args[2], [list(torch.argmax(args[-2],dim=-1).cpu().data.numpy()), list(args[-1].cpu().data.numpy())]
         # return [list(torch.argmax(x,dim=-1).cpu().data.numpy()) for x in args]
         
     def epoch_parser(train_results, val_results):

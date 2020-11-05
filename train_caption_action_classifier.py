@@ -15,7 +15,7 @@ def main(args):
         return batch[0], torch.stack([torch.eye(43)[l] for l in batch[1]])
 
     def batch_parser(*args):
-        return [list(torch.argmax(x,dim=-1).cpu().data.numpy()) for x in args]
+        return args[2], [list(torch.argmax(x,dim=-1).cpu().data.numpy()) for x in args[-2:]]
         
     def epoch_parser(train_results, val_results):
         train_losses,   train_pairs = zip(*train_results)
