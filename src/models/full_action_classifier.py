@@ -10,7 +10,7 @@ class RGBFlowCaptionActionClassifier(nn.Module):
             nn.Linear(i, o),
             nn.BatchNorm1d(o),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.5),
         )
         
         self.pre_att = Attention(4096,4096)
@@ -26,7 +26,7 @@ class RGBFlowCaptionActionClassifier(nn.Module):
         )
         self.linear = nn.Sequential(
             linearLayer(1024, 512),
-            nn.Linear( 512,   16),
+            nn.Linear( 512,   43),
             nn.Softmax(-1),
         )
         
