@@ -61,10 +61,8 @@ class ModelTrainer:
     
     def test(self, data_loader):
         fun = lambda f,l: [f(i,b,len(l)) for i,b in enumerate(l)]
-        train_res = fun(self.validate,data_loader['training'])
-        torch.cuda.empty_cache()
         val_res   = fun(self.validate,data_loader['validation'])
         torch.cuda.empty_cache()
         test_res  = fun(self.validate,data_loader['testing'])
         torch.cuda.empty_cache()
-        return self.parse_epoch(train_res, val_res, test_res)
+        return self.parse_epoch(val_res, test_res)
