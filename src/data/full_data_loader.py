@@ -5,12 +5,13 @@ import os
 from random import shuffle
 
 class RGBFlowCaptionEmbeddingsInstanceLoader:
-    def __init__(self, path, load_captions=False, untrained_bert=False):
+    def __init__(self, path, load_captions=False, untrained_bert=False, bbox_type=None):
         self.path = path
         self.instances = None
         self.length = 2
         self.load_captions = load_captions
         self.untrained_bert = untrained_bert
+        self.bbox_type = bbox_type
     def __len__(self):
         return self.length
     def load_npz(self, path):
@@ -22,9 +23,11 @@ class RGBFlowCaptionEmbeddingsInstanceLoader:
     def load_npzs(self, path):
         files = sorted(glob(os.path.join(self.path,path)))
         num  = min(10,len(files)//2)
-        pre_emb  = torch.tensor([self.load_npz(x) for x in files[:num]])
-        post_emb = torch.tensor([self.load_npz(x) for x in files[-num:]])
-        return torch.mean(pre_emb.float(), axis=0), torch.mean(post_emb.float(), axis=0)
+        if num == 0:
+            return torch.zeros(4096).float(),torch.zeros(4096).float()
+        pre_emb  = torch.tensor(sum([self.load_npz(x) for x in files[:num]])/num)
+        post_emb = torch.tensor(sum([self.load_npz(x) for x in files[-num:]])/num)
+        return pre_emb.float(), post_emb.float()
     def __getitem__(self, index):
         if self.instances is None:
             if self.untrained_bert:
@@ -34,14 +37,17 @@ class RGBFlowCaptionEmbeddingsInstanceLoader:
             caption_files = sorted(glob(os.path.join(self.path,search_str)))
             cap_loader = lambda f: torch.tensor(np.load(f)['data'][0])*int(self.load_captions)
             pre_cap_emb, post_cap_emb = [cap_loader(f) for f in caption_files]
-            pre_rgb_emb, post_rgb_emb = self.load_npzs('*rgb.npz')
+            if self.bbox_type is None:
+                pre_rgb_emb, post_rgb_emb = self.load_npzs('*rgb.npz')
+            else:
+                pre_rgb_emb, post_rgb_emb = self.load_npzs(f'*rgb_{self.bbox_type}.npz')
             pre_flow_emb, post_flow_emb = self.load_npzs('*flow.npz')
             self.instances = [[pre_cap_emb,  pre_rgb_emb,  pre_flow_emb  ],
                               [post_cap_emb, post_rgb_emb, post_flow_emb ]]
         return self.instances[index]
 class RGBFlowCaptionEmbeddingsDataLoader:
-    def __init__(self, path_list, batch_size, load_captions=False, utrained_bert=False, attention_model=None):
-        path_parser = lambda f: (RGBFlowCaptionEmbeddingsInstanceLoader(f[0],load_captions, utrained_bert),int(f[1])-1)
+    def __init__(self, path_list, batch_size, load_captions=False, utrained_bert=False, attention_model=None, bbox_type=None):
+        path_parser = lambda f: (RGBFlowCaptionEmbeddingsInstanceLoader(f[0],load_captions, utrained_bert,bbox_type),int(f[1])-1)
         self.instanceLoaders = [path_parser(f) for f in path_list]
         self.__reset()
         self.batch_size = batch_size

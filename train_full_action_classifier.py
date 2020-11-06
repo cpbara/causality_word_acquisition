@@ -10,6 +10,7 @@ from statistics import mean
 import random
 from src.data.full_data_loader import RGBFlowCaptionEmbeddingsDataLoader
 from src.models.full_action_classifier import RGBFlowCaptionActionClassifier
+from src.models.noun_grounding_model import MentalAttentionModel
 
 random.seed(0)
 
@@ -25,7 +26,7 @@ def init_weights(m):
 def main(args):    
     def batch_prepper(batch):
         # return batch[0], torch.stack([torch.eye(16)[SUPER_CLASSES[l]] for l in batch[1]])
-        return batch[0], torch.tensor([SUPER_CLASSES[l] for l in batch[1]])
+        return batch[0], torch.tensor([l for l in batch[1]])
 
     def batch_parser(*args):
         return args[2], [list(torch.argmax(args[-2],dim=-1).cpu().data.numpy()), list(args[-1].cpu().data.numpy())]
@@ -43,12 +44,20 @@ def main(args):
         val_acc2 = accuracy_score(f(sum(val_pred,[])), f(sum(val_labels,[])))
         return mean(train_losses), mean(val_losses), 100*train_acc, 100*val_acc, 100*train_acc2, 100*val_acc2
     
+    if args.attention_model is None:
+        attention_model = None
+        model = RGBFlowCaptionActionClassifier().to(args.device)
+    else:
+        attention_model = MentalAttentionModel()
+        attention_model.load_state_dict(torch.load(args.attention_model))
+        model = RGBFlowCaptionActionClassifier(use_attention=True).to(args.device)
+    
     files = action_recognition_splits(args.data_root_path, args.train_list, args.test_list)
     data_loader = {}
     for key, val in files.items():
-        data_loader[key] = RGBFlowCaptionEmbeddingsDataLoader(val, batch_size=args.batch_size)
+        data_loader[key] = RGBFlowCaptionEmbeddingsDataLoader(val, batch_size=args.batch_size, attention_model=attention_model, bbox_type=args.bbox_type)
 
-    model = RGBFlowCaptionActionClassifier().to(args.device)
+    
 
     if not args.pretrained_model is None:
         model.load_state_dict(torch.load(args.pretrained_model))
@@ -71,7 +80,7 @@ def main(args):
         batch_postproc=batch_parser,
         epoch_postproc=epoch_parser,
         device = args.device,
-        max_grad_norm=1.0
+        max_grad_norm=args.max_grad_norm
     )
 
     timer = Stopwatch()
@@ -98,6 +107,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Language Model Trainer')
     parser.add_argument('--pretrained_model', type=str, default=None,
                         help='path to pretrained model')
+    parser.add_argument('--attention_model', type=str, default=None,
+                        help='Mental Attention model to use')
     parser.add_argument('--out_model_path', type=str, default='classification_model.torch',
                         help='path to where the trained classifier model should be saved')
     parser.add_argument('--language_model_path', type=str, default='language_model.torch',
@@ -116,4 +127,8 @@ if __name__ == "__main__":
                         help='path to training instance list file')
     parser.add_argument('--device', type=str, default=Consts.DEVICE,
                         help='device to use cuda or cpu')
+    parser.add_argument('--max_grad_norm', type=float, default=Consts.max_grad_norm,
+                        help='maximum gradient norm')
+    parser.add_argument('--bbox_type', type=str, default=None,
+                        help='Type of bbox to use <pr_bbox>, <gt_bbox> or leave unassigned')
     main(parser.parse_args())
