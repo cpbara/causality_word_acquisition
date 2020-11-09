@@ -82,7 +82,7 @@ def main(args):
                                 bbox = [int(x) for x in bbox]
                                 xmin, ymin, xmax, ymax = bbox[0], bbox[1], bbox[2]+bbox[0], bbox[3]+bbox[1]
                                 gtm = np.zeros(img.shape)
-                                gtm[xmin:xmax][ymin:ymax][:] = 1
+                                gtm[ymin:ymax,xmin:xmax,:] = 1
                                 pr_mask += gtm
                     pr_mask = np.clip(pr_mask,0,1)/2 + 0.5
                     
@@ -105,7 +105,7 @@ def main(args):
                     # print(b)
                     xmin, ymin, xmax, ymax = b[0], b[1], b[2]+b[0], b[3]+b[1]
                     gtm = np.zeros(img.shape)
-                    gtm[xmin:xmax][ymin:ymax][:] = 1
+                    gtm[ymin:ymax,xmin:xmax,:] = 1
                     gt_mask += gtm
                 gt_mask = np.clip(gt_mask,0,1)/2 + 0.5
                 
