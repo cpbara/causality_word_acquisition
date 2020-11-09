@@ -53,8 +53,6 @@ def main(args):
     for key, val in files.items():
         data_loader[key] = RGBFlowCaptionEmbeddingsDataLoader(val, batch_size=args.batch_size, attention_model=attention_model, bbox_type=args.bbox_type)
 
-    
-
     if not args.pretrained_model is None:
         model.load_state_dict(torch.load(args.pretrained_model))
     else:
@@ -75,20 +73,13 @@ def main(args):
 
     timer = Stopwatch()
     pa = 0
-    for epoch in range(args.num_epochs):
-        tl, vl, ta, va, ta2, va2 = trainer(data_loader)
-        out_str = '; '.join([
-            f'Epoch: {epoch+1:5d}',
-            f'Loss:({tl:8.5f},{vl:8.5f})',
-            f'Acc: ({ta:5.1f}, {va:5.1f})',
-            f'Acc: ({ta2:5.1f}, {va2:5.1f})',
-            timer.lap_str()
-        ])
-        print(out_str, flush=True)
-        if pa < va:
-            torch.save(model.cpu().state_dict(), args.out_model_path)
-            model.to(args.device)
-            pa = va
+    tl, vl, ta, va, ta2, va2 = trainer.test(data_loader)
+    out_str = '; '.join([
+        f'Acc 43: {va:5.1f}',
+        f'Acc 16: {va2:5.1f}',
+        timer.lap_str()
+    ])
+    print(out_str, flush=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Language Model Trainer')
