@@ -2,7 +2,7 @@
 models/*.torch
 Attention.py
 AttentionModel.py
-sandbox.py
+sandbox*.py
 *.pyc
 */*.pyc
 data_chunk.py
