@@ -13,9 +13,35 @@ from src.models.image_model import ImageModel
 from src.models.noun_grounding_model import NoundGroundingModel
 import spacy
 from nltk import word_tokenize, pos_tag
-        
+import string
 
 def main(args):
+    files = action_recognition_splits(args.data_root_path, args.train_list, args.test_list)
+    
+    cap_lens = []
+    vocabulary = set()
+    for _, lst in files.items():
+        for path, _ in lst:
+            for amt_file in sorted(glob(os.path.join(path,'*amt.txt'))):
+                for line in open(amt_file):
+                    words = line.strip('<start>').strip('<end').split()
+                    cap_lens.append(len(words))
+                    vocabulary |= (set(words))
+    vocabulary -= set(string.punctuation)
+    vocabulary = dict([(w,i) for i,w in enumerate(sorted(list(vocabulary)))])
+    json.dump(vocabulary,open('vocabulary.json','w'),indent=4)
+    for _, lst in files.items():
+        for path, _ in lst:
+            for amt_file in sorted(glob(os.path.join(path,'*amt.txt'))):
+                emb = np.zeros(len(vocabulary))
+                for line in open(amt_file):
+                    for word in line.strip('<start>').strip('<end').split():
+                        if word in vocabulary:
+                            emb[vocabulary[word]] = 1
+                out_file = amt_file.rsplit('.',1)[0]+'_naive.npz'
+                np.savez_compressed(out_file,data=emb)
+                print(out_file)
+
     from_pretrained_bert_lang_model = Consts.untrained_bert()
     from_pretrained_bert_lang_model.load_state_dict(torch.load('models/language_model_from_pretrained_bert.torch'))
     from_pretrained_bert_lang_model.eval()
@@ -30,8 +56,6 @@ def main(args):
     
     tokenize = Tokenizer()
     img_read_fun = lambda f: np.transpose(cv2.resize(cv2.imread(f)/255,(224,224)), (2,1,0))
-    
-    files = action_recognition_splits(args.data_root_path, args.train_list, args.test_list)
     
     nlp = spacy.load('en_core_web_md')
     
@@ -57,8 +81,8 @@ def main(args):
                     sentence = bbox_data['caption'].replace(" <end>", ".").partition(' ')[2].replace('..','.')
                     tokenized = word_tokenize(sentence)
                     tokenized = word_tokenize(sentence)
-                    words = [word.lower() for (word, pos) in pos_tag(tokenized)]
-                    temp = [is_noun(pos) for (word, pos) in pos_tag(tokenized)]
+                    words = [word.lower() for (word, _) in pos_tag(tokenized)]
+                    temp = [is_noun(pos) for (_, pos) in pos_tag(tokenized)]
                     ids = [i for i, x in enumerate(temp) if x][:6]
                     embs = nlp(sentence)
                     w_embs = {}
