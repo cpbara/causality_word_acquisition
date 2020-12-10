@@ -1,1 +1,1 @@
-# from data_provider import Provider
+from src.consts import *
