@@ -90,32 +90,34 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Language Model Trainer')
-    parser.add_argument('--pretrained_model', type=str, default=None,
-                        help='path to pretrained model')
-    parser.add_argument('--attention_model', type=str, default=None,
-                        help='Mental Attention model to use')
-    parser.add_argument('--out_model_path', type=str, default='classification_model.torch',
-                        help='path to where the trained classifier model should be saved')
-    parser.add_argument('--language_model_path', type=str, default='language_model.torch',
-                        help='path to where the trained language model should be saved')
-    parser.add_argument('--learning_rate', type=float, default=Consts.learning_rate,
-                        help='optimizer learning rate')
-    parser.add_argument('--num_epochs', type=int, default=Consts.num_epochs,
-                        help='number of epochs to train')
-    parser.add_argument('--batch_size', type=int, default=Consts.batch_size,
-                        help='size of the mini batch')
-    parser.add_argument('--train_list', type=str, default=Consts.Splits.ActionRecognition.train_list,
-                        help='path to training instance list file')
-    parser.add_argument('--test_list', type=str, default=Consts.Splits.ActionRecognition.test_list,
-                        help='path to training instance list file')
-    parser.add_argument('--data_root_path', type=str, default=Consts.data_root_path,
-                        help='path to training instance list file')
-    parser.add_argument('--device', type=str, default=Consts.DEVICE,
-                        help='device to use cuda or cpu')
-    parser.add_argument('--max_grad_norm', type=float, default=Consts.max_grad_norm,
-                        help='maximum gradient norm')
     parser.add_argument('--ma_emb_sufix', type=str, default=None,
                         help='Type of Mental Attention sufix to use, e.g. <MentAttFromNounGrounding> or leave unassigned')
     parser.add_argument('--train_set_size', type=int, default=None,
                         help='size in % of the trainning set [1-70]')
+    parser.add_argument('--pretrained_model', type=str, default=None,
+                        help='path to pretrained model')
+    parser.add_argument('--out_model_path', type=str, default='classification_model.torch',
+                        help='path to where the trained classifier model should be saved')
+    
+    
+    # parser.add_argument('--attention_model', type=str, default=None,
+    #                     help='Mental Attention model to use')
+    # parser.add_argument('--language_model_path', type=str, default='language_model.torch',
+    #                     help='path to where the trained language model should be saved')
+    # parser.add_argument('--learning_rate', type=float, default=Consts.learning_rate,
+    #                     help='optimizer learning rate')
+    # parser.add_argument('--num_epochs', type=int, default=Consts.num_epochs,
+    #                     help='number of epochs to train')
+    # parser.add_argument('--batch_size', type=int, default=Consts.batch_size,
+    #                     help='size of the mini batch')
+    # parser.add_argument('--train_list', type=str, default=Consts.Splits.ActionRecognition.train_list,
+    #                     help='path to training instance list file')
+    # parser.add_argument('--test_list', type=str, default=Consts.Splits.ActionRecognition.test_list,
+    #                     help='path to training instance list file')
+    # parser.add_argument('--data_root_path', type=str, default=Consts.data_root_path,
+    #                     help='path to training instance list file')
+    # parser.add_argument('--device', type=str, default=Consts.DEVICE,
+    #                     help='device to use cuda or cpu')
+    # parser.add_argument('--max_grad_norm', type=float, default=Consts.max_grad_norm,
+    #                     help='maximum gradient norm')
     main(parser.parse_args())
