@@ -58,7 +58,7 @@ class ActionDataLoader:
             self.__reset()
             raise StopIteration()
         start = self.index * self.batch_size
-        end   =      start + self.batch_size
+        end   = min(start + self.batch_size, len(self.instanceLoaders))
         if end - start == 1:
             self.__reset()
             raise StopIteration()
