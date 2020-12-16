@@ -25,10 +25,10 @@ def init_weights(m):
 def main(args):    
     def batch_prepper(batch):
         # print('#',end='',flush=True)
-        return batch[0], torch.stack([torch.eye(43)[l] for l in batch[1]])
+        # return batch[0], torch.stack([torch.eye(43)[l] for l in batch[1]])
         # return batch[0], torch.stack([torch.eye(16)[SUPER_CLASSES[l]] for l in batch[1]])
         # return batch[0], torch.tensor([SUPER_CLASSES[l] for l in batch[1]])
-        # return batch[0], torch.tensor(batch[1])
+        return batch[0], torch.tensor(batch[1])
 
     def batch_parser(*args):
         progress = 100*args[0]/args[1]
@@ -36,8 +36,8 @@ def main(args):
         # print(args[0].shape)
         # print(args[1].shape)
         # print('&',end='',flush=True)
-        # return list(torch.argmax(args[0],dim=-1).cpu().data.numpy()), list(args[1].cpu().data.numpy())
-        return args[2], [list(torch.argmax(x,dim=-1).cpu().data.numpy()) for x in args[-2:]]
+        return args[2], list(torch.argmax(args[-2],dim=-1).cpu().data.numpy()), list(args[-1].cpu().data.numpy())
+        # return args[2], [list(torch.argmax(x,dim=-1).cpu().data.numpy()) for x in args[-2:]]
         
     def epoch_parser(train_results, val_results):
         # print('',flush=True)
@@ -66,16 +66,16 @@ def main(args):
 
     trainer = ModelTrainer(
         model = model,
-        criterion = nn.MSELoss(),
-        # criterion = nn.CrossEntropyLoss(),
-        optimizer = lambda model: optim.SGD (
-            model.parameters(), 
-            lr=args.learning_rate, 
-            momentum=0.9, 
-            weight_decay=1e-4),
-        # optimizer = lambda model: optim.Adam(
+        # criterion = nn.MSELoss(),
+        criterion = nn.CrossEntropyLoss(),
+        # optimizer = lambda model: optim.SGD (
         #     model.parameters(), 
-        #     lr=args.learning_rate),
+        #     lr=args.learning_rate, 
+        #     momentum=0.9, 
+        #     weight_decay=1e-4),
+        optimizer = lambda model: optim.Adam(
+            model.parameters(), 
+            lr=args.learning_rate),
         batch_preproc=batch_prepper,
         batch_postproc=batch_parser,
         epoch_postproc=epoch_parser,

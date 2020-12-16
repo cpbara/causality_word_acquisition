@@ -8,10 +8,11 @@ sandbox*.sh
 */*.pyc
 data_chunk.py
 data_provider.py
-nohup.out
+nohup*
 .vscode
 *.log
 nouns_eval.py
 *.png
 out
 out/*
+corpus.json
