@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from glob import glob
 import os
+import math
 from random import shuffle
 
 class ActionInstanceLoader:
@@ -44,7 +45,7 @@ class ActionDataLoader:
         self.instanceLoaders = [path_parser(f) for f in path_list]
         self.__reset()
         self.batch_size = batch_size
-        self.length = len(path_list) // self.batch_size + 1
+        self.length = math.ceil(len(path_list) / self.batch_size)
     def __reset(self):
         self.index = 0
         shuffle(self.instanceLoaders)
