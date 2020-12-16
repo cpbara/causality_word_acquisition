@@ -72,21 +72,13 @@ def main(args):
     )
 
     timer = Stopwatch()
-    pa = 0
-    for epoch in range(args.num_epochs):
-        tl, vl, ta, va, ta2, va2 = trainer(data_loader)
-        out_str = '; '.join([
-            f'Epoch: {epoch+1:5d}',
-            f'Loss:({tl:8.5f},{vl:8.5f})',
-            f'Acc: ({ta:5.1f}, {va:5.1f})',
-            f'Acc: ({ta2:5.1f}, {va2:5.1f})',
-            timer.lap_str()
-        ])
-        print(out_str, flush=True)
-        if pa < va:
-            torch.save(model.cpu().state_dict(), args.out_model_path)
-            model.to(args.device)
-            pa = va
+    _, _, _, ta, _, ta2 = trainer.test(data_loader)
+    out_str = '; '.join([
+        f'Acc 43: {ta:5.1f}',
+        f'Acc 16: {ta2:5.1f}',
+        timer.lap_str()
+    ])
+    print(out_str, flush=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Language Model Trainer')
