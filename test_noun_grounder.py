@@ -86,10 +86,9 @@ def main(args):
     timer = Stopwatch()
 
 
-    _, _, _, ta, _, ta2, _, tiou = trainer.test(data_loader)
+    _, _, _, ta, _, _, _, tiou = trainer.test(data_loader)
     out_str = '; '.join([
         f'Acc: ({ta:5.1f})',
-        f'Acc: ({ta2:5.1f})',
         f'IoU: ({tiou:5.3f})',
         timer.lap_str()
     ])
